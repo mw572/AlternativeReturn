@@ -2,7 +2,7 @@
 title: "Portfolio Optimisation with alternative asset classes using MVO"
 author: "Marcus Williamson"
 date: "18 June 2016"
-output: pdf_document
+output: html_document
 ---
 
 In order to construct the fund's portfolio efficiently over at [AlternativeReturn](www.alternativereturn.com), for this optimisation [Modern Portfolio Theory](https://en.wikipedia.org/wiki/Modern_portfolio_theory) was called upon. 
