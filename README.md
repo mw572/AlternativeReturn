@@ -11,4 +11,4 @@ __Input:__ Monthly returns for several securities / assets
 
 __Output:__ Expected returns, Standard deviations and Sharpe Ratios for % allocations across the different securities / assets
  
-Click [here]() to view the final writeup. Please visit [AlternativeReturn](www.alternativereturn.com) to learn more about what is being done here!
+__Click [here](https://mw572.github.io/AlternativeReturn/ar_mvo_writeup.html) to view the final writeup__. Please visit [AlternativeReturn](www.alternativereturn.com) to learn more about what is being done here!
