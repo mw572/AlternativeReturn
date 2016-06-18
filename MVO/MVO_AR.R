@@ -1,39 +1,35 @@
-# Economist at Large
-# Modern Portfolio Theory
-# Use solve.QP to solve for efficient frontier
-# Last Edited 5/3/13
-
-# This file uses the solve.QP function in the quadprog package to solve for the
-# efficient frontier.
-# Since the efficient frontier is a parabolic function, we can find the solution
-# that minimizes portfolio variance and then vary the risk premium to find
-# points along the efficient frontier. Then simply find the portfolio with the
-# largest Sharpe ratio (expected return / sd) to identify the most
-# efficient portfolio
+#########################################################
+# Mean Variance Optimisation -  Modern Portfolio Theory #
+# Creating efficient frontiers for optimial allocations #
+#########################################################
+# Marcus Williamson 18/06/16 - Orig: Economist at Large #
+#########################################################
 
 library(stockPortfolio) # Base package for retrieving returns
 library(ggplot2) # Used to graph efficient frontier
-library(reshape2) # Used to melt the data
-library(quadprog) #Needed for solve.QP
+library(reshape2) # Used to manipulate the data
+library(quadprog) #Needed for solve.QP, solving quadratic problems
 
-returns <- read.csv("ar_monthly_returns_v2.csv", header = TRUE)
+setwd("~/Documents/Repos/AlternativeReturn/MVO") # Set directory
 
-#Remove date and convert to numeric data frame
+returns <- read.csv("Data/ar_monthly_returns_80.csv", header = TRUE) # Loan in our monthly returns
+
+# Remove date and convert to numeric data frame
 returns <- returns[,-1]
 returns[, 1:4] <- sapply(returns[, 1:4], as.numeric)
 
-#### Efficient Frontier function ####
+#### Efficient Frontier function ###############################################
 eff.frontier <- function (returns, short="no", max.allocation=NULL,
                           risk.premium.up=.5, risk.increment=.005){
   # return argument should be a m x n matrix with one column per security
   # short argument is whether short-selling is allowed; default is no (short
-  # selling prohibited)max.allocation is the maximum % allowed for any one
+  # selling prohibited) max.allocation is the maximum % allowed for any one
   # security (reduces concentration) risk.premium.up is the upper limit of the
   # risk premium modeled (see for loop below) and risk.increment is the
   # increment (by) value used in the for loop
   
   covariance <- cov(returns)
-  print(covariance)
+  #print(covariance)
   n <- ncol(covariance)
   
   # Create initial Amat and bvec assuming only equality constraint
@@ -83,12 +79,14 @@ eff.frontier <- function (returns, short="no", max.allocation=NULL,
   
   return(as.data.frame(eff))
 }
+#### End of Efficient Frontier Function ######################################
+
 
 # Run the eff.frontier function based on no short and 50% alloc. restrictions
 eff <- eff.frontier(returns=returns, short="no", max.allocation=0.5,
                     risk.premium.up=0.5, risk.increment=.001)
 
-# Find the optimal portfolio
+# Find the optimal portfolios
 eff.optimal.point <- eff[eff$sharpe==max(eff$sharpe),]
 eff.tenpercent <- eff[eff$sharpe==max(eff$sharpe[eff$Exp.Return>((1.1^(1/12))-1)]),]
 
@@ -99,7 +97,9 @@ ealtan <- "#CDC4B6"
 eallighttan <- "#F7F6F0"
 ealdark <- "#423C30"
 
+# Plot it
 ggplot(eff, aes(x=Std.Dev, y=Exp.Return)) + geom_point(alpha=.1, color=ealdark) +
+  
   #Plotting the optimal portfolio first
   geom_point(data=eff.optimal.point, aes(x=Std.Dev, y=Exp.Return, label=sharpe),
              color=ealred, size=5) +
@@ -110,6 +110,7 @@ ggplot(eff, aes(x=Std.Dev, y=Exp.Return)) + geom_point(alpha=.1, color=ealdark) 
                        round(((1+eff.optimal.point$Exp.Return)^(12)-1)*100, digits=2),"%\nSharpe: ",
                        round(eff.optimal.point$sharpe*sqrt(12), digits=4), sep=""),
            hjust=-0.2, vjust=-0.2) +
+  
   #Plotting the optimised 10% return portfolio
   geom_point(data=eff.tenpercent, aes(x=Std.Dev, y=Exp.Return, label=sharpe),
              color=ealdark, size=5) +
@@ -121,10 +122,14 @@ ggplot(eff, aes(x=Std.Dev, y=Exp.Return)) + geom_point(alpha=.1, color=ealdark) 
                        round(eff.tenpercent$sharpe*sqrt(12), digits=4), sep=""),
            hjust=-0.2, vjust=-0.2) +
   #End plotting
+  
   ggtitle("Efficient Frontier and Optimal Portfolio by Sharpe Ratio") +
-  labs(x="Risk (standard deviation of portfolio)", y="Return") +
+  labs(x="Monthly Risk (standard deviation of portfolio)", y="Monthly Return") +
   theme(panel.background=element_rect(fill=eallighttan),
         text=element_text(color=ealdark),
         plot.title=element_text(size=24, color=ealred))
 
-head(eff)
+# Ouput our optimal allocations and stats
+eff.optimal.point
+eff.tenpercent
+
