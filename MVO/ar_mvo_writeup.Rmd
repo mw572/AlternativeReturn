@@ -29,7 +29,7 @@ For __Crowdfunded Debt__ I used a [CDS measure](http://www.alternativereturn.com
 
 For __Crowdfunded Property__ I used the [Halifax House Price Index](http://www.halifax.co.uk/house-price-index/) data, then added on rental yields to to reach the rates seen on the lending platforms currently, this was again simulated historically to achieve a monthly returns series from 2005.
 
-For __Whisky__ I used a [composite index](https://www.whiskystats.net/wwi/) of all Whisky auction prices which have taken place since 2005, I have then adjustd to include the frictional monthly storage fee, we are left with an conservative average annual return as compared to research of the platform which I use to buy & sell Whisky.
+For __Whisky__ I used a [composite index](https://www.whiskystats.net/wwi/) of all Whisky auction prices which have taken place since 2005, I have then adjusted to include the frictional monthly storage fee, we are left with an conservative average annual return as compared to research of the platform which I use to buy & sell Whisky.
 
 For __Gold__ I used the [price of Gold](https://www.bullionvault.com/gold-price-chart.do) in GBP since 2005, nothing clever here!
 
@@ -128,6 +128,7 @@ eff.frontier <- function (returns, short="no", max.allocation=NULL,
 ```
 
 A couple of things to note here, you can find the full breakdown and method on [Wikipedia](https://en.wikipedia.org/wiki/Modern_portfolio_theory), however in terms of the key variables:
+
 + Covariance - The covariance matrix calculated from returns data
 + dvec - Vector of average returns for each security, to find minimum portfolio variance we set these to zero
 + Amat - A matrix of constraints, such as the weights must sum to 1, no negative weights (if no short selling) and limiting the max weight of any security (if its been set)
@@ -172,7 +173,7 @@ First we shall use ggplot to generate a seductive chart:
    
    #Plotting the optimal portfolio first
    geom_point(data=eff.optimal.point, aes(x=Std.Dev, y=Exp.Return, label=sharpe),
-              color=ealred, size=5) +
+              color=ealred, size=3) +
    annotate(geom="text", x=eff.optimal.point$Std.Dev,
             y=eff.optimal.point$Exp.Return,
             label=paste("Optimal Portfolio\nRisk: ",
@@ -183,7 +184,7 @@ First we shall use ggplot to generate a seductive chart:
    
    #Plotting the optimised 10% return portfolio
    geom_point(data=eff.tenpercent, aes(x=Std.Dev, y=Exp.Return, label=sharpe),
-              color=ealdark, size=5) +
+              color=ealdark, size=3) +
    annotate(geom="text", x=eff.tenpercent$Std.Dev,
             y=eff.tenpercent$Exp.Return,
            label=paste("10% Return Optimised\nRisk: ",
