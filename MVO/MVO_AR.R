@@ -62,14 +62,14 @@ eff.frontier <- function (returns, short="no", max.allocation=NULL,
   
   # Initialize a matrix to contain allocation and statistics
   # This is not necessary, but speeds up processing and uses less memory
-  eff <- matrix(nrow=loops, ncol=n+3)
+  effd <- matrix(nrow=loops, ncol=n+3)
   # Now I need to give the matrix column names
   colnames(eff) <- c(colnames(returns), "Std.Dev", "Exp.Return", "sharpe")
   
   # Loop through the quadratic program solver
   for (i in seq(from=0, to=risk.premium.up, by=risk.increment)){
     dvec <- colMeans(returns) * i # This moves the solution along the EF
-    sol <- solve.QP(covariance, dvec=dvec, Amat=Amat, bvec=bvec, meq=meq)
+    sol <- solve.QP(2*covariance, dvec=dvec, Amat=Amat, bvec=bvec, meq=meq)
     eff[loop,"Std.Dev"] <- sqrt(sum(sol$solution*colSums((covariance*sol$solution))))
     eff[loop,"Exp.Return"] <- as.numeric(as.character((sol$solution %*% colMeans(returns))))
     eff[loop,"sharpe"] <- eff[loop,"Exp.Return"] / eff[loop,"Std.Dev"]
@@ -81,6 +81,34 @@ eff.frontier <- function (returns, short="no", max.allocation=NULL,
 }
 #### End of Efficient Frontier Function ######################################
 
+# Create Simulations over a rolling time period
+
+rows <- seq(1,ceiling(0.3*nrow(returns)))
+cols <- ncol(returns)+3
+optimalpoints <- matrix(nrow=ceiling(0.7*nrow(returns)), ncol=cols)
+colnames(optimalpoints) <- c(colnames(returns), "Std.Dev", "Exp.Return", "sharpe")
+
+
+for (i in seq(1,nrow(returns)*0.7,1)){
+  
+  returnsample <- returns[rows,]
+  eff <- eff.frontier(returns=returnsample, short = "no", max.allocation =0.5,
+                      risk.premium.up=0.5, risk.increment =.001) # calc frontier
+  
+  eff.optimal.point <- eff[eff$sharpe==max(eff$sharpe),] # find optimal point
+ 
+   #something is not working here cannot use "optimalpoints[i,1:8] <- eff.optimal.point"...
+  optimalpoints[i,1] <- eff.optimal.point[,1]  
+  optimalpoints[i,2] <- eff.optimal.point[,2]
+  optimalpoints[i,3] <- eff.optimal.point[,3]
+  optimalpoints[i,4] <- eff.optimal.point[,4]
+  optimalpoints[i,5] <- eff.optimal.point[,5]
+  optimalpoints[i,6] <- eff.optimal.point[,6]
+  optimalpoints[i,7] <- eff.optimal.point[,7]
+  optimalpoints[i,8] <- eff.optimal.point[,8]
+  
+  rows = rows + 1
+}
 
 # Run the eff.frontier function based on no short and 50% alloc. restrictions
 eff <- eff.frontier(returns=returns, short="no", max.allocation=0.5,
@@ -90,6 +118,10 @@ eff <- eff.frontier(returns=returns, short="no", max.allocation=0.5,
 eff.optimal.point <- eff[eff$sharpe==max(eff$sharpe),]
 eff.tenpercent <- eff[eff$sharpe==max(eff$sharpe[eff$Exp.Return>((1.1^(1/12))-1)]),]
 
+# Add simulations to eff data
+
+eff <- rbind(eff,optimalpoints) #bind them
+
 # graph efficient frontier
 # Start with color scheme
 ealred <- "#7D110C"
@@ -97,9 +129,9 @@ ealtan <- "#CDC4B6"
 eallighttan <- "#F7F6F0"
 ealdark <- "#423C30"
 
-# Plot it
+#### Plot it
 ggplot(eff, aes(x=Std.Dev, y=Exp.Return)) + geom_point(alpha=.1, color=ealdark) +
-  
+
   #Plotting the optimal portfolio first
   geom_point(data=eff.optimal.point, aes(x=Std.Dev, y=Exp.Return, label=sharpe),
              color=ealred, size=5) +
@@ -130,6 +162,9 @@ ggplot(eff, aes(x=Std.Dev, y=Exp.Return)) + geom_point(alpha=.1, color=ealdark) 
         plot.title=element_text(size=24, color=ealred))
 
 # Ouput our optimal allocations and stats
+meanoptimal <- colMeans(optimalpoints) # mean of simulations
+meanoptimal
 eff.optimal.point
 eff.tenpercent
 
+meanoptimal <- colMeans(optimalpoints)

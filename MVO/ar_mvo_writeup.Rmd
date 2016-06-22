@@ -115,7 +115,7 @@ eff.frontier <- function (returns, short="no", max.allocation=NULL,
    # Loop through the quadratic program solver
    for (i in seq(from=0, to=risk.premium.up, by=risk.increment)){
      dvec <- colMeans(returns) * i # This moves the solution along the EF
-     sol <- solve.QP(covariance, dvec=dvec, Amat=Amat, bvec=bvec, meq=meq)
+     sol <- solve.QP(2*covariance, dvec=dvec, Amat=Amat, bvec=bvec, meq=meq)
      eff[loop,"Std.Dev"] <- sqrt(sum(sol$solution*colSums((covariance*sol$solution))))
      eff[loop,"Exp.Return"] <- as.numeric(as.character((sol$solution %*% colMeans(returns))))
      eff[loop,"sharpe"] <- eff[loop,"Exp.Return"] / eff[loop,"Std.Dev"]
